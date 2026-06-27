@@ -50,18 +50,21 @@ export default {
           // Conversion directa mm → puntos usando las dimensiones reales del PDF
           // Sin depender de ninguna configuracion de tamano de hoja
           const MM_TO_PT = 2.835;
-          const xPt    = pos.x * MM_TO_PT;
-          const yTopPt = ph - (pos.y * MM_TO_PT);
-          const font   = pos.negrita ? fonts.bold : fonts.normal;
+          const xPt     = pos.x * MM_TO_PT;
+          const font    = pos.negrita ? fonts.bold : fonts.normal;
 
           let size = parseFloat(pos.tam) || 10;
           if (pos.ancho && pos.ancho > 0) {
-            const anchoPt = (pos.ancho / pageWidthMM) * pw;
+            const anchoPt = pos.ancho * MM_TO_PT;
             const wText   = font.widthOfTextAtSize(pos.valor, size);
             if (wText > anchoPt) size = (anchoPt / wText) * size;
           }
 
-          const yBasePt = yTopPt - size;
+          // Y: Canva mide desde arriba hasta la esquina superior del elemento.
+          // pdf-lib posiciona por la baseline del texto.
+          // Ajuste: restar la altura del ascendente (~75% del tamaño de fuente).
+          const yCanvaPt = pos.y * MM_TO_PT;          // distancia desde arriba en pt
+          const yBasePt  = ph - yCanvaPt - (size * 0.75); // baseline en coordenadas pdf-lib
 
           let color = rgb(0, 0, 0);
           const hex = (pos.color || '#000000').replace('#', '');
