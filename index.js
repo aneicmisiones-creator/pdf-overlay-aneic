@@ -34,7 +34,7 @@ export default {
       };
 
       for (const paginaData of paginas) {
-        const [copia] = await outputDoc.copyPagesFrom(templateDoc, [0]);
+        const [copia] = await outputDoc.copyPages(templateDoc, [0]);
         outputDoc.addPage(copia);
         const page = outputDoc.getPage(outputDoc.getPageCount() - 1);
         const { width: pw, height: ph } = page.getSize();
