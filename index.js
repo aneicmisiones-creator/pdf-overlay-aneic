@@ -76,11 +76,12 @@ export default {
             if (wText > anchoPt) size = (anchoPt / wText) * size;
           }
 
-          // Y: Canva mide desde arriba hasta la esquina superior del elemento.
-          // pdf-lib posiciona por la baseline del texto.
-          // Ajuste: restar la altura del ascendente (~75% del tamaño de fuente).
-          const yCanvaPt = pos.y * MM_TO_PT;          // distancia desde arriba en pt
-          const yBasePt  = ph - yCanvaPt - (size * 0.75); // baseline en coordenadas pdf-lib
+          // Y: Canva mide desde arriba hasta la esquina superior del texto.
+          // pdf-lib posiciona por la baseline.
+          // font.heightAtSize(size) da la altura exacta de la fuente a ese tamaño,
+          // que es la distancia entre la esquina superior y la baseline.
+          const yCanvaPt = pos.y * MM_TO_PT;
+          const yBasePt  = ph - yCanvaPt - font.heightAtSize(size);
 
           let color = rgb(0, 0, 0);
           const hex = (pos.color || '#000000').replace('#', '');
