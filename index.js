@@ -30,9 +30,22 @@ export default {
       const templateDoc = await PDFDocument.load(pdfBytes);
       const outputDoc   = await PDFDocument.create();
 
-      const fonts = {
-        normal: await outputDoc.embedFont(StandardFonts.Helvetica),
-        bold:   await outputDoc.embedFont(StandardFonts.HelveticaBold),
+      // Embeber las 14 fuentes estandar de PDF
+      const fontMap = {
+        'Helvetica':              await outputDoc.embedFont(StandardFonts.Helvetica),
+        'Helvetica-Bold':         await outputDoc.embedFont(StandardFonts.HelveticaBold),
+        'Helvetica-Oblique':      await outputDoc.embedFont(StandardFonts.HelveticaOblique),
+        'Helvetica-BoldOblique':  await outputDoc.embedFont(StandardFonts.HelveticaBoldOblique),
+        'Times-Roman':            await outputDoc.embedFont(StandardFonts.TimesRoman),
+        'Times-Bold':             await outputDoc.embedFont(StandardFonts.TimesRomanBold),
+        'Times-Italic':           await outputDoc.embedFont(StandardFonts.TimesRomanItalic),
+        'Times-BoldItalic':       await outputDoc.embedFont(StandardFonts.TimesRomanBoldItalic),
+        'Courier':                await outputDoc.embedFont(StandardFonts.Courier),
+        'Courier-Bold':           await outputDoc.embedFont(StandardFonts.CourierBold),
+        'Courier-Oblique':        await outputDoc.embedFont(StandardFonts.CourierOblique),
+        'Courier-BoldOblique':    await outputDoc.embedFont(StandardFonts.CourierBoldOblique),
+        'Symbol':                 await outputDoc.embedFont(StandardFonts.Symbol),
+        'ZapfDingbats':           await outputDoc.embedFont(StandardFonts.ZapfDingbats),
       };
 
       // Leer dimensiones reales del PDF (en puntos: 1mm = 2.835pt)
@@ -51,7 +64,10 @@ export default {
           // Sin depender de ninguna configuracion de tamano de hoja
           const MM_TO_PT = 2.835;
           const xPt     = pos.x * MM_TO_PT;
-          const font    = pos.negrita ? fonts.bold : fonts.normal;
+          // Usar la fuente exacta configurada — el usuario elige del desplegable
+          // que ya incluye las variantes Bold/Italic en el nombre
+          const fontKey = (pos.fuente && fontMap[pos.fuente]) ? pos.fuente : 'Helvetica';
+          const font    = fontMap[fontKey];
 
           let size = parseFloat(pos.tam) || 10;
           if (pos.ancho && pos.ancho > 0) {
