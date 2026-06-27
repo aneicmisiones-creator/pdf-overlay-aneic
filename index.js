@@ -18,7 +18,9 @@ export default {
 
     try {
       const body = await request.json();
-      const { pdfBase64, paginas, pageWidthMM, pageHeightMM } = body;
+      const { pdfBase64, paginas } = body;
+      // pageWidthMM y pageHeightMM ya no se usan —
+      // las dimensiones se leen directamente del PDF
 
       if (!pdfBase64 || !paginas || !paginas.length) {
         return new Response('Faltan: pdfBase64, paginas', { status: 400, headers: corsHeaders });
@@ -33,17 +35,23 @@ export default {
         bold:   await outputDoc.embedFont(StandardFonts.HelveticaBold),
       };
 
+      // Leer dimensiones reales del PDF (en puntos: 1mm = 2.835pt)
+      const templatePage = templateDoc.getPages()[0];
+      const { width: pw, height: ph } = templatePage.getSize();
+
       for (const paginaData of paginas) {
         const [copia] = await outputDoc.copyPages(templateDoc, [0]);
         outputDoc.addPage(copia);
         const page = outputDoc.getPage(outputDoc.getPageCount() - 1);
-        const { width: pw, height: ph } = page.getSize();
 
         for (const pos of (paginaData.posiciones || [])) {
           if (!pos.valor) continue;
 
-          const xPt    = (pos.x / pageWidthMM) * pw;
-          const yTopPt = ph - (pos.y / pageHeightMM) * ph;
+          // Conversion directa mm → puntos usando las dimensiones reales del PDF
+          // Sin depender de ninguna configuracion de tamano de hoja
+          const MM_TO_PT = 2.835;
+          const xPt    = pos.x * MM_TO_PT;
+          const yTopPt = ph - (pos.y * MM_TO_PT);
           const font   = pos.negrita ? fonts.bold : fonts.normal;
 
           let size = parseFloat(pos.tam) || 10;
